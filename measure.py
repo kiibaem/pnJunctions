@@ -1,12 +1,16 @@
-import visa
-import time
+import csv
+import numpy as np
+import pickle
 import sys
+import time
+import visa
+
 from PyExpLabSys.drivers import tenma
 
 rm = visa.ResourceManager()
 
 amp = rm.open_resource(u'ASRL3::INSTR')
-volt = rm.open_resource( u'ASRL4::INSTR')
+volt = rm.open_resource(u'ASRL4::INSTR')
 
 volt.write(":SYST:REM")
 amp.write(":SYST:REM")
@@ -19,21 +23,49 @@ amp.write("TRIG:SOUR BUS")
 
 
 ps = tenma.Tenma722535("COM6")
-ps.out("OUT0")
+print(ps.com("*IDN?"))
+print(ps.get_identification())
+ps.set_output(False)
 
-volts=[]
-amps=[]
-while True:
-    inp = raw_input("command:")
-    print(inp)
-    if inp != "q":
-        volt.write("INIT")
-        amp.write("INIT")
-        volt.write("*TRG")
-        amp.write("*TRG")
-        time.sleep(7)
-        volts.append(volt.query("FETC?"))
-        amps.append(amp.query("FETC?"))
-        
-    else:
-        sys.exit()
+
+# ps.com("OUT0") # This is the hard way, in case their wrappers don't work
+# ps.com("ISET1:0.33")
+# ps.com("VSET1:0")
+# ps.com("OCP1")
+
+
+volts = []
+amps = []
+start = input("start: ")
+stop = input("stop: ")
+step = input("step: ")
+s_type = input("Semiconductor type:")
+
+ps.set_voltage(0)
+ps.set_current(0.33)
+ps.set_overcurrent_protection(True)
+ps.set_output(True)
+
+for val in np.arange(start, stop, step):
+    ps.set_voltage(val)
+    volt.write("INIT")
+    amp.write("INIT")
+    volt.write("*TRG")
+    amp.write("*TRG")
+    time.sleep(5)
+    volts.append(volt.query("FETC?"))
+    amps.append(amp.query("FETC?"))
+
+
+with open(str(s_type), "w") as csvf:
+    wr = csv.writer(csvf, delimiter=",", quotechar="|",
+                    quoting=csv.QUOTE_MINIMAL)
+    wr.writerow(volts)
+    wr.writerow(amps)
+
+
+with open(str(s_type), "wb") as pick:
+    pickle.dump(amps, pick)
+
+with open(str(s_type+"V"), "wb") as pick:
+    pickle.dump(volts, pick)
