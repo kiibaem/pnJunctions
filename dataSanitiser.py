@@ -1,12 +1,22 @@
 import json as js
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
 
-with open('c:/Users/Caroline/Documents/Year 3/pnJunctions/pnJunctions/amps.json', 'r') as a:
-    amps = js.load(a)
+# with open('c:/Users/Caroline/Documents/Year 3/pnJunctions/pnJunctions/amps.json') as a:
+#     amps = js.load(a)['values']
 
-with open('c:/Users/Caroline/Documents/Year 3/pnJunctions/pnJunctions/volts.json', 'r') as v:
-    volts = js.load(v)
+# with open('c:/Users/Caroline/Documents/Year 3/pnJunctions/pnJunctions/volts.json') as v:
+#     volts = js.load(v)
 
-amps = [i.strip("\r\n") for i in amps]
-amps = [i.strip("u'") for i in amps]
+amps = pd.read_json('c:/Users/Caroline/Documents/Year 3/pnJunctions/pnJunctions/amps.json')
+volts = pd.read_json('c:/Users/Caroline/Documents/Year 3/pnJunctions/pnJunctions/volts.json')
 
-print(amps)
+ampAvgList = [np.mean(eval(i)) for i in amps['values']]
+voltAvgList = [np.mean(eval(i)) for i in volts['values']]
+
+table = pd.DataFrame({"amps": ampAvgList,"volts": voltAvgList})
+
+plt.plot(table['volts'], table['amps'],'o')
+plt.show()
+print(table)
