@@ -39,7 +39,7 @@ amps = []
 start = input("start: ")
 stop = input("stop: ")
 step = input("step: ")
-s_type = input("Semiconductor type:")
+s_type = str(input("Semiconductor type:"))
 
 ps.set_voltage(0)
 ps.set_current(0.33)
@@ -56,16 +56,20 @@ for val in np.arange(start, stop, step):
     volts.append(volt.query("FETC?"))
     amps.append(amp.query("FETC?"))
 
+ps.set_output(False)
+ps.close()
+amp.close()
+volt.close()
 
-with open(str(s_type), "w") as csvf:
+
+with open(str(s_type)+".csv", "w") as csvf:
     wr = csv.writer(csvf, delimiter=",", quotechar="|",
                     quoting=csv.QUOTE_MINIMAL)
     wr.writerow(volts)
     wr.writerow(amps)
 
-
-with open(str(s_type), "wb") as pick:
+with open(str(s_type+"_T"), "wb") as pick:
     pickle.dump(amps, pick)
 
-with open(str(s_type+"V"), "wb") as pick:
+with open(str(s_type+"V_T"), "wb") as pick:
     pickle.dump(volts, pick)
