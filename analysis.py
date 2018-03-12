@@ -36,8 +36,8 @@ with open(FILE+"V", "wb") as pick:
 am = np.mean(amps, axis=1)
 vm = np.mean(volts, axis=1)
 
-plt.plot(vm, am, 'bo')
-plt.show()
+#plt.plot(vm, am, 'bo')
+#plt.show()
 
 def savetocsv():
     with open(FILE + ".csv", "w") as csvf:
