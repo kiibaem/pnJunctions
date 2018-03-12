@@ -1,5 +1,5 @@
 import csv
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 import numpy as np
 import pickle
 
@@ -26,10 +26,10 @@ volts = np.array(v2, dtype=float)
 
 # Save it back to file so we can work with it again
 with open(FILE, "wb") as pick:
-    pickle.dump(amps, pick, protocol=2, fix_imports=True)
+    pickle.dump(amps, pick, protocol=2)
 
 with open(FILE+"V", "wb") as pick:
-    pickle.dump(volts, pick, protocol=2, fix_imports=True)
+    pickle.dump(volts, pick, protocol=2)
 
 
 
