@@ -4,7 +4,7 @@ import numpy as np
 import pickle
 
 # Constant to make it easier to work on a single dataset at a time
-FILE=""
+FILE=str(input("Enter file base name:"))
 
 # Open up the raw DMM data
 with open(FILE+"_T", "rb") as pick:
@@ -25,11 +25,11 @@ volts = np.array(v2, dtype=float)
 
 
 # Save it back to file so we can work with it again
-with open(FILE, "rb") as pick:
-    pickle.dump(amps, pick)
+# with open(FILE, "wb") as pick:
+#     pickle.dump(amps, pick)
 
-with open(FILE+"V", "rb") as pick:
-    pickle.dump(volts, pick)
+# with open(FILE+"V", "wb") as pick:
+#     pickle.dump(volts, pick)
 
 
 # Take the mean of each set of repeats
