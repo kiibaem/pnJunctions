@@ -25,11 +25,11 @@ volts = np.array(v2, dtype=float)
 
 
 # Save it back to file so we can work with it again
-# with open(FILE, "wb") as pick:
-#     pickle.dump(amps, pick)
+with open(FILE, "wb") as pick:
+    pickle.dump(amps, pick, protocol=2)
 
-# with open(FILE+"V", "wb") as pick:
-#     pickle.dump(volts, pick)
+with open(FILE+"V", "wb") as pick:
+    pickle.dump(volts, pick, protocol=2)
 
 
 # Take the mean of each set of repeats
