@@ -3,7 +3,7 @@ import numpy
 import matplotlib.pyplot as plt
 
 
-FILE = "GaAsRT"
+FILE = input("Enter base file name")
 
 with open(FILE, "rb") as pick:
     amps = pickle.load(pick)
