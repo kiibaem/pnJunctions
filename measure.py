@@ -142,13 +142,15 @@ while True:
     elif start == "a":
         start = 0
         max_current = float(input("Max current: "))
+        step = float(input("Step: "))
+        if step == "":
+            step = 0.01
         ps.set_output(False)
         ps.set_current(max_current)
         ps.set_voltage(10)
         ps.set_output(True)
         plt.pause(0.5)
         stop = ps.get_actual_voltage()
-        step = 0.01
         ps.set_output(False)
         print(stop)
     else:
