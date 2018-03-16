@@ -39,6 +39,8 @@ def f(volts_s, m, c):
 
 def fitNplot(f, title, amps, volts, T, range=0):
     lnamps = np.log(amps)
+    lnerrs = [i**(-1)*5e-4 for i in amps]
+    volterrs = np.full(len(volts),5e-4)
     if range == 0:
         plt.figure()
         plt.plot(volts,lnamps,'o')
@@ -46,18 +48,21 @@ def fitNplot(f, title, amps, volts, T, range=0):
         plt.ylabel('Ln(current)')
         plt.xlabel('Voltage (V)')
     else:
-        lnamps_s = val_range(volts,lnamps,range[0],range[1])[1]
-        volts_s = val_range(volts,lnamps,range[0],range[1])[0]
+        ranges = val_range(volts,lnamps,volterrs,lnerrs,range[0],range[1])
+        lnamps_s = ranges[1]
+        volts_s = ranges[0]
+        volterrs_s = ranges[2]
+        lnamperrs_s = ranges[3]
         plt.figure()
-        plt.plot(volts_s, lnamps_s, 'o')
-        fit = op.curve_fit(f, volts_s, lnamps_s)
+        plt.errorbar(volts_s, lnamps_s,xerr=volterrs_s,yerr=lnamperrs_s,fmt='o')
+        fit = op.curve_fit(f, volts_s, lnamps_s, sigma=lnamperrs_s)
         line = [fit[0][0]*i+fit[0][1] for i in volts_s]
-        plt.plot(volts_s,line, '-')
+        plt.plot(volts_s,line,'-')
         plt.title(title)
         plt.ylabel('Ln(current)')
         plt.xlabel('Voltage (V)')
         perr = np.sqrt(np.diag(fit[1]))
-        print("Value of n: %g" % n(fit[0][0],T), "Error on n: %g" % nerr(fit[0][0],perr[0],T), "Value of I_0: %g A" % i0(fit[0][1]), "Error on I_0: %g" % i0err(fit[0][1],perr[1]))
+        return [n(fit[0][0],T),nerr(fit[0][0],perr[0],T),i0(fit[0][1]),i0err(fit[0][1],perr[1])]
 
 def n(slope,T):
     ns = (e)/(slope*kB*T)
@@ -75,14 +80,18 @@ def i0err(icept,iceptErr):
     i0errs = np.exp(icept)*iceptErr
     return i0errs
 
-def val_range(volts, lnamps, lo=0, hi=0):
+def val_range(volts, lnamps, volterrs, lnamperrs, lo=0, hi=0):
     volts_s = []
     lnamps_s = []
+    volterrs_s = []
+    lnamperrs_s = []
     for i,j in enumerate(volts):
-        if (j > lo) and (j < hi) and (np.isnan(lnamps[i]) == False):
+        if (j > lo) and (j < hi) and (np.isnan(lnamps[i]) == False) and (np.isinf(lnamps[i]) == False):
                 volts_s.append(j)
                 lnamps_s.append(lnamps[i])
-    return [volts_s,lnamps_s]
+                lnamperrs_s.append(lnamperrs[i])
+                volterrs_s.append(volterrs[i])
+    return [volts_s,lnamps_s,volterrs_s,lnamperrs_s]
 
 # Silicon, room temp
 def plot(results):
@@ -98,38 +107,18 @@ def plot(results):
 def analyse(data):
     for i in dict.keys(data):
         if 'LN' in i:
-            print(i)
-            fitNplot(f,i,data[i][0],data[i][1], T_LN, data[i][2])
+            dat = fitNplot(f,i,data[i][0],data[i][1], T_LN, data[i][2])
+            resultsTable[i] = pd.Series(dat,['n', 'n Error', 'I_0 (A)', 'I_0 Error (A)'])
         else:
-            print(i)
             fitNplot(f,i,data[i][0],data[i][1], T, data[i][2])
+            resultsTable[i] = pd.Series(dat,['n', 'n Error', 'I_0 (A)', 'I_0 Error (A)'])
+
+resultsTable = pd.DataFrame(columns=names)
 
 #print(data(names))
 analyse(data(names))
-#print(pd.DataFrame(data(names)))
+print(resultsTable)
 
-# print('Silicon in liquid nitrogen')
-# fitNplot(f,SiLN,SiLNV,val_range(SiLNV, 0.99, 1.05),T_LN)
-# print('Silicon in liquid nitrogen 2')
-# fitNplot(f,SiLN2,SiLN2V,val_range(SiLN2V, 1.25, 1.6),T_LN)
-
-# print('Silicon at room temperature')
-# fitNplot(f,SiRT,SiRTV,val_range(SiRTV, 0.3, 0.74),T)
-
-# print('Silicon at room temperature 2')
-# fitNplot(f,SiRT2,SiRT2V,val_range(SiRT2V, 0.3, 0.74),T)
-
-# print('GaAs in liquid nitrogen')
-# fitNplot(f,GaAsLN,GaAsLNV,val_range(GaAsLNV, 1.48 ,2.1),T_LN)
-
-# print('GaAs at room temperature')
-# fitNplot(f,GaAsRT,GaAsRTV,val_range(GaAsRTV, 1.05, 1.18),T)
-
-# print('Ge in liquid nitrogen')
-# fitNplot(f,GeLN,GeLNV,val_range(GeLNV, 0.85, 1.03),T_LN)
-
-# print('Ge at room temperature')
-# fitNplot(f,GeRT,GeRTV,val_range(GeRTV, 0.40, 0.68),T)
 
 
 plt.show()
