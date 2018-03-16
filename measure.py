@@ -157,10 +157,13 @@ while True:
         start = float(start)
         stop = float(input("stop: "))
         step = float(input("step: "))
+        max_current = float(input("Max current: "))
+        if max_current == "":
+            max_current = 0.05
+        ps.set_current(max_current)
     s_type = str(input("Semiconductor type:"))
 
     ps.set_voltage(0)
-    ps.set_current(0.33)
     # ps.set_overcurrent_protection(True)
     ps.set_output(True)
 
