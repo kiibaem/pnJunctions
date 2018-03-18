@@ -1,17 +1,19 @@
 import numpy as np
 import time
 
-FILE="test.txt"
 
-lines=[]
+def import_temps(FILE):
+    lines = []
 
-with open(FILE, "r") as file:
-    for line in file:
-        lines.append(line)
+    with open(FILE, "r") as file:
+        for line in file:
+            lines.append(line)
 
-l = [i.split('\t') for i in lines][1:]
-temps = np.array([i[3] for i in l], dtype=float)
-times = np.array([i[1].split('_')[1] for i in l])
+    l = [i.split('\t') for i in lines][1:]
+    temps = np.array([i[3] for i in l], dtype=float)
+    times = np.array([i[1].split('_')[1] for i in l])
+
+    return times, temps
 
 def find_time(time_string, times):
     """Readbility"""
