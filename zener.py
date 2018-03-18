@@ -120,7 +120,7 @@ try:
     amp.write(":CONF:CURR:DC 0.33,0.33")
     amp.write("SAMP:COUN 10")
     amp.write("TRIG:SOUR IMM")
-    volt.write(":NPLC 1")
+    amp.write(":NPLC 1")
 
     ps.set_output(False)
 
