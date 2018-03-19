@@ -2,7 +2,7 @@ import pickle
 import temperature
 
 
-FILE="TEST"
+FILE="Data/Z27"
 
 times, temps = temperature.import_temps(str(FILE+"_TEMP.txt"))
 
