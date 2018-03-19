@@ -115,12 +115,10 @@ try:
     volt.write(":CONF:VOLT:DC 3,3")
     volt.write("SAMP:COUN 10")
     volt.write("TRIG:SOUR IMM")
-    volt.write(":NPLC 1")
 
     amp.write(":CONF:CURR:DC 0.33,0.33")
     amp.write("SAMP:COUN 10")
     amp.write("TRIG:SOUR IMM")
-    amp.write(":NPLC 1")
 
     ps.set_output(False)
 
@@ -133,18 +131,27 @@ try:
         sys.exit()
 
     while True:
-
+        auto=False
         start = input("start (q to exit): ")
         if start == "q":
             exit()
+        elif start == "a":
+            auto=True
+            step = float(input("step: "))
+            max_current = float(input("Max current: "))
+            min_current = float(input("Min current: "))
+            ps.set_current(max_current)
         else:
             start = float(start)
             stop = float(input("stop: "))
             step = float(input("step: "))
             max_current = float(input("Max current: "))
-            if max_current == "":
-                max_current = 0.05
+            min_current = float(input("Min current: "))
             ps.set_current(max_current)
+            if step < 0:
+                test_current = min_current
+            else:
+                test_current = max_current
         s_type = str(input("Semiconductor type:"))
 
         ps.set_voltage(0)
@@ -155,9 +162,23 @@ try:
 
         try:
             while True:
+                if auto:
+                    ps.set_voltage(10)
+                    ps.set_output(True)
+                    time.sleep(0.2)
+                    stop = ps.get_actual_voltage()+0.05
+                    print(stop)
+                    ps.set_current(min_current)
+                    time.sleep(0.2)
+                    start = ps.get_actual_voltage()-0.05
+                    print(start)
+                    ps.set_output(False)
+                    ps.set_current(max_current)
                 start_time = temperature.store_time()
                 volts = []
                 amps = []
+                ps.set_output(True)
+                time.sleep(0.2)
                 for val in np.arange(start, stop, step):
                     ps.set_voltage(val)
                     v_temp = (volt.query("READ?"))[:-2]
@@ -168,20 +189,26 @@ try:
                     a_temp = np.array(a_temp, dtype=float)
                     volts.append(v_temp)
                     amps.append(a_temp)
+                    # if step < 0:
+                    #     if np.mean(a_temp) < min_current:
+                    #         break
+                    # else:
+                    #     if np.mean(a_temp) >= 0.95 * max_current:
+                    #         break
 
                 end_time = temperature.store_time()
                 ps.set_output(False)
                 volts = np.array(volts)
                 amps = np.array(amps)
-                results[i] = {"volts": volts, "amps": amps, "start_time": start_time, "end_time": end_time}
+                results[i] = {"volts": volts, "amps": amps,
+                              "start_time": start_time, "end_time": end_time}
                 i += 1
-
-
-            with open(str(s_type+"_T"), "wb") as pick:
-                pickle.dump(results, pick)
 
         except KeyboardInterrupt:
             ps.set_output(False)
+            print("DUMP")
+            with open(str(s_type+"_T"), "wb") as pick:
+                pickle.dump(results, pick)
 except Exception as e:
     """Try not to set things on fire if something goes wrong"""
     print("ABORT")
