@@ -17,6 +17,6 @@ voltAvgList = [np.mean(eval(i)) for i in volts['values']]
 
 table = pd.DataFrame({"amps": ampAvgList,"volts": voltAvgList})
 
-plt.plot(table['volts'], table['amps'],'o')
+plt.plot(table['volts'], np.log(table['amps']),'o')
 plt.show()
 print(table)
