@@ -11,6 +11,9 @@ T = 295.6
 T_LN = 79.5
 sigmaT = 0.05
 
+epsilon0 = 8.854e-12
+epsilonr = 11.68
+
 def f(volts_s, m, c):
      vals = m*volts_s + c
      return vals
@@ -69,22 +72,24 @@ def part1i(data):
 
 def part2ii(data):
     results = pd.DataFrame(columns = dict.keys(data))
+    sqFitVals = []
     for i in dict.keys(data):
-        volts = data[i][0]
-        capacitance = data[i][1]
+        volts = data[i][0][1:]
+        capacitance = data[i][1][1:]
         voltErrs = ld.voltageErr(volts)
         capErrs = ld.capacitanceErr(capacitance)
         invCapSq = [i**(-2) for i in capacitance]
         invCapSqErr = [invCapSq[i]**(-3)*capErrs[i] for i in range(len(capErrs))]
         invCapCb = [i**(-3) for i in capacitance]
         invCapCbErr = [invCapCb[i]**(-4)*capErrs[i] for i in range(len(capErrs))]
-        fitCube = op.curve_fit(f,volts,invCapCb,sigma=invCapCbErr,absolute_sigma=True,p0=[invCapCb[0],invCapCb[0]])
+        fitCube = op.curve_fit(f,volts,invCapCb,sigma=invCapCbErr,absolute_sigma=True,p0=[invCapCb[1],invCapCb[1]])
         cubeLine = [fitCube[0][0]*i+fitCube[0][1] for i in volts]
         cbErr = np.sqrt(np.diag(fitCube[1])[0])
-        fitSquare = op.curve_fit(f,volts,invCapSq,sigma=invCapSqErr,absolute_sigma=True,p0=[invCapCb[0],invCapCb[0]])
+        fitSquare = op.curve_fit(f,volts,invCapSq,sigma=invCapSqErr,absolute_sigma=True,p0=[invCapSq[1],invCapSq[1]])
         squareLine = [fitSquare[0][0]*i+fitSquare[0][1] for i in volts]
         sqErr = np.sqrt(np.diag(fitSquare[1])[0])
         results[i] = pd.Series([cbErr,sqErr], index = ['Error on cubic','Error on square'])
+        sqFitVals.append(fitSquare[0])
 
         plt.figure()
         plt.title(i + 'Cubic approximation')
@@ -101,9 +106,18 @@ def part2ii(data):
         plt.ylabel('1/C^2 (C^-2)')
 
     print(results)
+    print(sqFitVals)
     plt.show()
+    
+    return sqFitVals
+
+def N(m,A):
+    N = 2./((A**(2))*e*epsilon0*epsilonr*m)
+    return N
 
 #part1i(ld.diode_data)
-part2ii(ld.cap_data)
+#part2ii(ld.cap_data)
+print(N(part2ii(ld.cap_data)[0][0],2e-3))
+print(N(part2ii(ld.cap_data)[1][0],2e-3))
 #ld.plotIV(ld.diode_data)
 #ld.plotCV(ld.cap_data)
