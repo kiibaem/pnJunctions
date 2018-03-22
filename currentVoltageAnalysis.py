@@ -78,17 +78,23 @@ def part2ii(data):
         capacitance = data[i][1][1:]
         voltErrs = ld.voltageErr(volts)
         capErrs = ld.capacitanceErr(capacitance)
+
         invCapSq = [i**(-2) for i in capacitance]
         invCapSqErr = [invCapSq[i]**(-3)*capErrs[i] for i in range(len(capErrs))]
+
         invCapCb = [i**(-3) for i in capacitance]
         invCapCbErr = [invCapCb[i]**(-4)*capErrs[i] for i in range(len(capErrs))]
+
         fitCube = op.curve_fit(f,volts,invCapCb,sigma=invCapCbErr,absolute_sigma=True,p0=[invCapCb[1],invCapCb[1]])
         cubeLine = [fitCube[0][0]*i+fitCube[0][1] for i in volts]
         cbErr = np.sqrt(np.diag(fitCube[1])[0])
+
         fitSquare = op.curve_fit(f,volts,invCapSq,sigma=invCapSqErr,absolute_sigma=True,p0=[invCapSq[1],invCapSq[1]])
         squareLine = [fitSquare[0][0]*i+fitSquare[0][1] for i in volts]
         sqErr = np.sqrt(np.diag(fitSquare[1])[0])
-        results[i] = pd.Series([cbErr,sqErr], index = ['Error on cubic','Error on square'])
+        Nval = N(fitSquare[0][0],2e-6)
+        Vtval = Vt(fitSquare[0][1],Nval,2e-6)
+        results[i] = pd.Series([cbErr,sqErr,Nval,Vtval], index = ['Error on cubic','Error on square', 'Value of N', 'Value of Vt'])
         sqFitVals.append(fitSquare[0])
 
         plt.figure()
@@ -106,18 +112,19 @@ def part2ii(data):
         plt.ylabel('1/C^2 (C^-2)')
 
     print(results)
-    print(sqFitVals)
     plt.show()
-    
     return sqFitVals
 
 def N(m,A):
     N = 2./((A**(2))*e*epsilon0*epsilonr*m)
     return N
 
+def Vt(c,N,A):
+    Vt = (A**2*e*epsilon0*epsilonr*N*c)/2.
+    return Vt
+
 #part1i(ld.diode_data)
 #part2ii(ld.cap_data)
-print(N(part2ii(ld.cap_data)[0][0],2e-3))
-print(N(part2ii(ld.cap_data)[1][0],2e-3))
+part2ii(ld.cap_data)
 #ld.plotIV(ld.diode_data)
 #ld.plotCV(ld.cap_data)
