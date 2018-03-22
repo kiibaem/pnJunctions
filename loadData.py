@@ -15,7 +15,7 @@ sigmaT = 0.05
 diode_names = ['SiLN', 'SiRT', 'GaAsLN', 'GaAsRT', 'GeLN', 'GeRT', 'SiLN2', 'SiRT2','GaAsLN2', 'GaAsLN3']
 diode_ranges = [[100,200],[100,200],[100,200],[100,200],[100,200],[100,200],[100,200],[100,200],[100,200],[100,200]]
 LED_names = ['LEDREDRT', 'LEDREDRT2', 'LEDREDRT3', 'LEDREDRT4', 'LEDYELLOWRT', 'LEDYELLOWRT2', 'LEDYELLOWRT3', 'LEDREDRT5', 'LEDGREENRT']
-Si_diode_names = ['blackSiCap', 'redSiCap']
+Si_diode_names = ['littleSchCap', 'SchCap', 'blackSiCap']
 
 def data(names):
     results = {}
@@ -26,6 +26,9 @@ def data(names):
             results[j] = [pi.load(pick, fix_imports=True)]
         with open(j, 'rb') as pick:
             results[j].append(pi.load(pick,fix_imports=True))
+        if 'Cap' in j:
+            results[j][0] = np.stack([results[j][0][i] for i in range(len(results[j][0]))],axis=0)
+            results[j][1] = np.stack([results[j][1][i] for i in range(len(results[j][1]))],axis=0)
         if results[j][0][0] > results[j][0][-1]:
             results[j][1] = results[j][1][::-1]
             results[j][0] = results[j][0][::-1]
