@@ -91,7 +91,7 @@ try:
     ps.set_current(0.03)
     ps.set_voltage(0)
     ps.set_output(True)
-    for i in np.arange(0,2,0.05):
+    for i in np.arange(0,15,0.05):
         ps.set_voltage(i)
         rlc.write(b"*TRG\r\n")
         rlc.write(b"C?\r\n")
