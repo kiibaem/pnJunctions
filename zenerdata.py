@@ -2,6 +2,7 @@ import numpy as np
 import pickle
 from scipy import stats
 import matplotlib.pyplot as plt
+import temperature
 
 
 def mean(results):
@@ -43,3 +44,18 @@ def plot_temp(results):
     temps = [results[i]["mean_temp"] for i in results]
     plt.plot(temps, inters, 'bo')
     plt.show()
+
+
+def add_temps(results, FILE):
+    times, temps = temperature.import_temps(str(FILE+".txt"))
+    for i in results:
+        start_time = results[i]["start_time"]
+        end_time = results[i]["end_time"]
+        start_temp = (times == start_time).argmax()
+        if start_temp == 0 :
+            start_temp = (times == end_time).argmax()
+        if start_temp == 0 :
+            mean_temp = results[i-1]["mean_temp"]
+        else: 
+            mean_temp = temps[start_temp]
+        results[i]["mean_temp"] = mean_temp
