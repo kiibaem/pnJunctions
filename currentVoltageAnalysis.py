@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.optimize as op
+import pickle as pi
 
 e = 1.602e-19
 kB = 1.3806e-23
@@ -13,6 +14,18 @@ sigmaT = 0.05
 
 epsilon0 = 8.854e-12
 epsilonr = 11.68
+
+led_hotplate_names = ['greenhot', 'redhot', 'yellowhot']
+
+def loadLEDData(names):
+    results = {}
+    for i in names:
+        with open(i, 'rb') as FILE:
+            results[i] = pi.load(FILE, fix_imports= True)
+    return results
+
+led_hotplate_data = loadLEDData(led_hotplate_names)
+
 
 def f(volts_s, m, c):
      vals = m*volts_s + c
@@ -68,6 +81,7 @@ def part1i(data):
             perr = np.sqrt(np.diag(fit[1]))
             results[i] = pd.Series([n(fit[0][0],T),nerr(fit[0][0],perr[0],T),i0(fit[0][1]),i0err(fit[0][1],perr[1])], index= ['n','n error','I_0','I_0 error'])
     print(results)
+    #return results[i0].values()
 
 def part2ii(data):
     results = pd.DataFrame(columns = dict.keys(data))
@@ -122,25 +136,29 @@ def Vt(c,N,A):
     return Vt
 
 def part1vi(data):
-    for i in dict.keys(data):
-        T = i[0]
-        I = i[1]
-        V = i[2]
-        lnamps = np.log(I)
-        lnamperrs = [I[i]**(-1)*ld.currentErr(I)[i] for i in range(len(I))]
+    for i in data:
+        print( i)
+        T = data[i]["Temp"]
+        V = data[i]["Volts"]
+        I = data[i]["meanI"][0]
+        V_errors = ld.voltageErr(V)
         Terr = 0.05
         plt.figure()
-        plt.errorbar(T,lnamps, xerr = Terr, yerr = lnamperrs, fmt = 'o')
+        plt.errorbar(T, V, xerr = Terr, yerr = V_errors, fmt = 'o')
         plt.title(i)
         plt.xlabel('Temperature (K)')
-        plt.ylabel('ln(current)')
-        fit = op.curve_fit(f,T,I, p0 = [lnamps[0],lnamps[0]], sigma = lnamperrs, absolute_sigma=True)
+        plt.ylabel('Voltage (V)')
+        fit = op.curve_fit(f,T,V, p0 = [V[0],V[0]], sigma = V_errors, absolute_sigma=True)
         fitLine = [fit[0][0]*i + fit[0][1] for i in T]
         plt.plot(T, fitLine, '-')
+        Eg = -fit[0][0]*fit[0][1]
+        print(Eg)
 
-#part1i(ld.diode_data)
-part2ii(ld.cap_data)
-#ld.plotIV(ld.diode_data)
-#ld.plotCV(ld.cap_data)
+part1vi(led_hotplate_data)
+
+# part1i(ld.diode_data)
+# part2ii(ld.cap_data)
+# ld.plotIV(ld.diode_data)
+# ld.plotCV(ld.cap_data)
 
 plt.show()
