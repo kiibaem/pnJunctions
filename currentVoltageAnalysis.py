@@ -42,8 +42,8 @@ def part1i(data):
         lnamps = np.log(amps)
         lnerrs = [amps[i]**(-1)*ld.currentErr(amps)[i] for i in range(len(amps))]
         volterrs = ld.voltageErr(volts)
-        dat_start = min(np.where(amps >= 0.02)[0])
-        dat_range = [dat_start,dat_start+20]
+        dat_start = min(np.where(amps >= 0.03)[0])
+        dat_range = [dat_start,dat_start+15]
         if 'LN' in i:
             T = T_LN
         if dat_range == 0:
@@ -67,7 +67,6 @@ def part1i(data):
             plt.xlabel('Voltage (V)')
             perr = np.sqrt(np.diag(fit[1]))
             results[i] = pd.Series([n(fit[0][0],T),nerr(fit[0][0],perr[0],T),i0(fit[0][1]),i0err(fit[0][1],perr[1])], index= ['n','n error','I_0','I_0 error'])
-    plt.show()
     print(results)
 
 def part2ii(data):
@@ -98,21 +97,20 @@ def part2ii(data):
         sqFitVals.append(fitSquare[0])
 
         plt.figure()
-        plt.title(i + 'Cubic approximation')
+        plt.title(i + ' Cubic approximation')
         plt.errorbar(volts,invCapCb,yerr=invCapCbErr,xerr=voltErrs,fmt='o')
         plt.plot(volts,cubeLine,'-')
         plt.xlabel('Volts (V)')
         plt.ylabel('1/C^3 (C^-3)')
 
         plt.figure()
-        plt.title(i + 'Square approximation')
+        plt.title(i + ' Square approximation')
         plt.errorbar(volts,invCapSq,yerr=invCapSqErr,xerr=voltErrs,fmt='o')
         plt.plot(volts,squareLine,'-')
         plt.xlabel('Volts (V)')
         plt.ylabel('1/C^2 (C^-2)')
 
     print(results)
-    plt.show()
     return sqFitVals
 
 def N(m,A):
@@ -123,8 +121,26 @@ def Vt(c,N,A):
     Vt = (A**2*e*epsilon0*epsilonr*N*c)/2.
     return Vt
 
+def part1vi(data):
+    for i in dict.keys(data):
+        T = i[0]
+        I = i[1]
+        V = i[2]
+        lnamps = np.log(I)
+        lnamperrs = [I[i]**(-1)*ld.currentErr(I)[i] for i in range(len(I))]
+        Terr = 0.05
+        plt.figure()
+        plt.errorbar(T,lnamps, xerr = Terr, yerr = lnamperrs, fmt = 'o')
+        plt.title(i)
+        plt.xlabel('Temperature (K)')
+        plt.ylabel('ln(current)')
+        fit = op.curve_fit(f,T,I, p0 = [lnamps[0],lnamps[0]], sigma = lnamperrs, absolute_sigma=True)
+        fitLine = [fit[0][0]*i + fit[0][1] for i in T]
+        plt.plot(T, fitLine, '-')
+
 #part1i(ld.diode_data)
-#part2ii(ld.cap_data)
 part2ii(ld.cap_data)
 #ld.plotIV(ld.diode_data)
 #ld.plotCV(ld.cap_data)
+
+plt.show()

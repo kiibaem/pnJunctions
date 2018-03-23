@@ -15,7 +15,7 @@ sigmaT = 0.05
 diode_names = ['SiLN', 'SiRT', 'GaAsLN', 'GaAsRT', 'GeLN', 'GeRT', 'SiLN2', 'SiRT2','GaAsLN2', 'GaAsLN3']
 diode_ranges = [[100,200],[100,200],[100,200],[100,200],[100,200],[100,200],[100,200],[100,200],[100,200],[100,200]]
 LED_names = ['LEDREDRT', 'LEDREDRT2', 'LEDREDRT3', 'LEDREDRT4', 'LEDYELLOWRT', 'LEDYELLOWRT2', 'LEDYELLOWRT3', 'LEDREDRT5', 'LEDGREENRT']
-Si_diode_names = ['littleSchCap', 'SchCap', 'blackSiCap']
+Si_diode_names = ['littleSchCap', 'SchCap', 'blackSiCap', '1n4006cap', '1n5820cap']
 
 def data(names):
     results = {}
