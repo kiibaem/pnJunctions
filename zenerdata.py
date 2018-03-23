@@ -52,10 +52,52 @@ def add_temps(results, FILE):
         start_time = results[i]["start_time"]
         end_time = results[i]["end_time"]
         start_temp = (times == start_time).argmax()
-        if start_temp == 0 :
+        if start_temp == 0:
             start_temp = (times == end_time).argmax()
-        if start_temp == 0 :
+        if start_temp == 0:
             mean_temp = results[i-1]["mean_temp"]
-        else: 
+        else:
             mean_temp = temps[start_temp]
         results[i]["mean_temp"] = mean_temp
+
+
+def make_data(results):
+    data = results.copy()
+    print(data)
+    results.clear()
+    results["data"] = data.copy()
+
+
+def make_volts(results):
+    volts = [results["data"][i]["vm"][0] for i in results["data"]]
+    volts = np.array(volts)
+    results["Volts"] = volts
+
+
+def make_amps(results):
+    amps = [results["data"][i]["am"][0] for i in results["data"]]
+    amps = np.array(amps)
+    mean_amps = np.mean(amps)
+    std_amps = np.std(amps)
+    results["meanI"] = [mean_amps, std_amps]
+
+
+def make_temp(results):
+    temps = [results["data"][i]["mean_temp"] for i in results["data"]]
+    temps = np.array(temps)
+    results["Temp"] = temps
+
+
+def make_caroline(l_results):
+    if type(l_results) == list:
+        for results in l_results:
+            make_data(results)
+            make_volts(results)
+            make_amps(results)
+            make_temp(results)
+    else:
+        results = l_results
+        make_data(results)
+        make_volts(results)
+        make_amps(results)
+        make_temp(results)
