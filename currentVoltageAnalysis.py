@@ -151,7 +151,7 @@ def part1vi(data):
         fit = op.curve_fit(f,T,V, p0 = [V[0],V[0]], sigma = V_errors, absolute_sigma=True)
         fitLine = [fit[0][0]*i + fit[0][1] for i in T]
         plt.plot(T, fitLine, '-')
-        Eg = -fit[0][0]*fit[0][1]
+        Eg = -(fit[0][0]/fit[0][1])*e
         print(Eg)
 
 part1vi(led_hotplate_data)
